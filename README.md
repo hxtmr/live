@@ -8,6 +8,8 @@ git clone https://github.com/hxtmr/live.git
 
 cd live
 
+npm install
+
 npm start
 
 推送地址：https://localhost:449/push 

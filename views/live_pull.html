@@ -1,0 +1,24 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <title>视频直播</title>
+    <style type="text/css">
+        video {
+            width: 100%;
+            max-width: 640px;
+            -moz-transform: scaleX(-1);
+            -o-transform: scaleX(-1);
+            -webkit-transform: scaleX(-1);
+            transform: scaleX(-1);
+            filter: "FlipH";
+            -ms-filter: "FlipH";
+        }
+    </style>
+</head>
+<body>
+<script type="text/javascript" src="../lib/jquery.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script type="text/javascript" src="js/live_pull.js"></script>
+</body>
+</html>

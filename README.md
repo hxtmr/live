@@ -10,4 +10,7 @@ cd live
 
 npm start
 
+推送地址：https://localhost:449/push 
+
+拉取地址：https://localhost:449/pull 
 

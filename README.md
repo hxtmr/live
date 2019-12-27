@@ -12,7 +12,7 @@ npm install
 
 npm start
 
-推送地址：https://localhost:449/push 
+push：https://localhost:449/push 
 
-拉取地址：https://localhost:449/pull 
+pull：https://localhost:449/pull 
 

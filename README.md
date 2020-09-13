@@ -1,7 +1,7 @@
 # live
 webcamera live use mse api and played by video tag
 # html5直播
-mse+soket.io实现webm/vp9格式视频直播，由于视频格式是Google的所以。。。。chrome浏览器吧
+mse+soket.io,webm/vp9 stream living
 
 # 
 git clone https://github.com/hxtmr/live.git

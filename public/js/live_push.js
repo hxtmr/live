@@ -1,14 +1,3 @@
-window.bufferEqual = function (b1, b2) {
-    window.hasEqual = true
-    var len = Math.min(b1.byteLength, b2.byteLength, 10000)
-    var dv1 = new DataView(b1);
-    var dv2 = new DataView(b2);
-    for (var i = 0; i < len; i++) {
-        console.log('index:', i, dv1.getUint8(i), dv2.getUint8(i), dv1.getUint8(i) == dv2.getUint8(i))
-
-    }
-
-}
 /**
  * Creates a new Uint8Array based on two different ArrayBuffers
  *
@@ -33,17 +22,27 @@ var _appendBuffer = window._appendBuffer = function (bufferArray, buffer2) {
 };
 
 var socket = io.connect()
-var type = 'video/webm; codecs="vp9.0, vorbis"';
-
+var type = `video/webm;codecs="vp9,opus"`;
 var catStream = null;
 $(document).ready(function () {
-        if(window.location.protocol!='https:'){
+        if (window.location.protocol != 'https:') {
             alert("请使用https地址打开")
             return false;
         }
-        if ('mediaDevices'in navigator && 'MediaSource' in window && MediaSource.isTypeSupported('video/webm;codecs=vp9')) {
+        let msg = null;
+        if ('mediaDevices' in navigator && 'MediaSource' in window && MediaSource.isTypeSupported(type)) {
+            if (!'MediaRecorder' in window) {
+                msg = '不支持MediaRecord API '
+            }
+            if (!msg && !MediaRecorder.isTypeSupported(type)) {// #2 firefox can only play
+                console.log('MediaRecord API 不支持的媒体类型：' + type, '使用vp8格式')
+                type = `video/webm;codecs="vp8,opus"`;
+                if (!MediaRecorder.isTypeSupported(type)) {
+                    alert('MediaRecord API 不支持的媒体类型：' + type)
+                }
+            }
         } else {
-            alert('浏览器不支持MSE API,或者不支持vp9视频编码，推荐使用最新的Chrome或者firefox');
+            alert('浏览器不支持MSE API,或者不支持webM视频编码，推荐使用最新的Chrome或者firefox');
         }
 
         //console.log(navigator.mediaDevices.getSupportedConstraints())
@@ -63,7 +62,7 @@ $(document).ready(function () {
         window.RecordClass = function (options, downloadButton) {
             var self = this;
             this.catchedBuffer = [];
-            this.options = options || {video: {}, type: "video/webm;codecs=vp9,opus"}
+            this.options = options || {video: {}, type: type}
             this.mediaSource = new MediaSource();
             this.sourceBuffer = null;
             this.recordedBlobs = [];
@@ -75,11 +74,11 @@ $(document).ready(function () {
                 document.body.appendChild(this.video)
             }
             //private
-            var onBufferLoad = function (e) {
+            var onBufferLoad = function (buffer) {
                 var reader = this;// ended
-                if (self.sourceBuffer.updating !== true) {
+                if (self.sourceBuffer.updating !== true && buffer.byteLength > 0) {
                     try {
-                        var buffer = reader.result;
+                        console.log('bu', buffer)
                         if (self.catchedBuffer.length >= 1) {
                             var mbuffer = _appendBuffer(self.catchedBuffer, buffer)
                             self.catchedBuffer = []
@@ -92,15 +91,23 @@ $(document).ready(function () {
                         self.stop()
                     }
                 } else {
-                    self.catchedBuffer.push(reader.result)
+                    self.catchedBuffer.push(buffer)
                 }
             }
             this.mediaRecord.ondataavailable = function (e) {
-                self.recordedBlobs.push(e.data);
-                var reader = new FileReader();
-                reader.onload = onBufferLoad;
-                socket.emit('receiveBuffer', e.data);
-                reader.readAsArrayBuffer(e.data);
+                if (e.data.size > 0) {
+                    self.recordedBlobs.push(e.data);
+                    ////var reader = new FileReader();
+                    //reader.onload = onBufferLoad;
+                    console.log(e.data)
+                    e.data.arrayBuffer().then(d => {
+                        console.log(d)
+                        socket.emit('receiveBuffer', d);
+                        //socket.emit('receiveBuffer', 'fewfewf');
+                        onBufferLoad(d)
+                    })
+                    //reader.readAsArrayBuffer(e.data);
+                }
             }
             this.mediaRecord.onstart = function (e) {
                 console.log('start')
@@ -149,7 +156,7 @@ $(document).ready(function () {
                     this.stop()
                 }
                 this.attachVideo(function () {
-                    self.recordedBlobs=[];
+                    self.recordedBlobs = [];
                     self.mediaRecord.start(interval)
                 })
             }

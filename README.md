@@ -1,5 +1,5 @@
 # live
-webcamera live use mse api and played by video tag
+webcamera stream live without rtc peerconnection
 # html5直播
 mse+soket.io,webm/vp9 stream living
 
